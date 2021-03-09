@@ -1,2 +1,2 @@
 # isojourn
- ArduboyFX sdventure game using isometric tiles
+ ArduboyFX adventure game using isometric tiles
