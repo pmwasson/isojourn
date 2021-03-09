@@ -1,0 +1,34 @@
+﻿{
+  "schemaVersion": 3,
+  "title": "isojourn",
+  "author": "Paul Wasson",
+  "version": "0.1",
+  "date": "2021-03-09",
+  "genre": "adventure",
+  "binaries": [
+    {
+      "title": "isojourn",
+      "filename": "isojourn.hex",
+      "flashdata": "tiles.bin",
+      "device": "ArduboyFX"
+    }
+  ],
+  "buttons": [
+    {
+      "control": "Up",
+      "action": "turn up"
+    },
+    {
+      "control": "Down",
+      "action": "turn down"
+    },
+    {
+      "control": "Left",
+      "action": "turn left"
+    },
+    {
+      "control": "Right",
+      "action": "turn right"
+    }
+  ]
+}
