@@ -2,7 +2,7 @@
 #include <ArduboyFX.h>
 #include "isojourn.h"
 
-#define FX_DATA_PAGE 0xFF09
+#define FX_DATA_PAGE 0xFF0A
 #define FRAME_RATE 60
 #define ISOWIDTH 40
 #define ISOHEIGHT 20
@@ -11,7 +11,7 @@ Arduboy2 arduboy;
 
 uint8_t playerFrame = 0;
 
-uint24_t mapTile[8][4] = {
+uint8_t mapTile[8][4] = {
   {TILE_grass,    TILE_water,   TILE_grass,   TILE_grass},
   {       TILE_grass,    TILE_water,   TILE_weeds,      TILE_grass2},
   {TILE_rock1,   TILE_grass,   TILE_pondrock,   TILE_treePine},
@@ -87,7 +87,7 @@ void loop() {
   for (int8_t y = 0; y < 8; y++) {
     int8_t iy = isoY(y);
     for (int8_t x = 0; x < 4; x++) {
-      uint24_t tile = mapTile[y][x];
+      uint8_t tile = mapTile[y][x];
       uint8_t frame = 0;
       int8_t ix = isoX(x,y);
       
@@ -103,16 +103,16 @@ void loop() {
         frame = ((arduboy.frameCount) >> 5) % 3;
       }
 
-      FX::drawBitmap(ix,iy,tile,frame,dbmMasked);
+      FX::drawBitmap(ix,iy,TILE_START,tile+frame,dbmMasked);
 
       // draw player on top of map
       if ((x==1) && (y==5)) {
         if ((playerFrame == 0) &&
             ((((arduboy.frameCount) >> 3) & 0x3f) == 0)) { 
-          FX::drawBitmap(ix,iy,TILE_boy,1,dbmMasked);
+          FX::drawBitmap(ix,iy,TILE_START,TILE_boy+1,dbmMasked);
         }
         else {
-          FX::drawBitmap(ix,iy,TILE_player,playerFrame,dbmMasked);
+          FX::drawBitmap(ix,iy,TILE_START,TILE_player+playerFrame,dbmMasked);
         }
       }
     }
