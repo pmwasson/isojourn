@@ -2,7 +2,7 @@
 #include <ArduboyFX.h>
 #include "isojourn.h"
 
-#define FX_DATA_PAGE 0xFF0A
+#define FX_DATA_PAGE 0xFEE9
 #define FRAME_RATE 60
 #define ISOWIDTH 40
 #define ISOHEIGHT 20
@@ -12,14 +12,14 @@ Arduboy2 arduboy;
 uint8_t playerFrame = 0;
 
 uint8_t mapTile[8][4] = {
-  {TILE_grass,    TILE_water,   TILE_grass,   TILE_grass},
-  {       TILE_grass,    TILE_water,   TILE_weeds,      TILE_grass2},
-  {TILE_rock1,   TILE_grass,   TILE_pondrock,   TILE_treePine},
-  {       TILE_logL,    TILE_grass,   TILE_water,   TILE_treePine},
-  {TILE_grass2,   TILE_campfire,   TILE_grass2,  TILE_reed},
-  {       TILE_grass,    TILE_grass/*p*/,   TILE_grass,      TILE_water},
-  {TILE_treePine,    TILE_grass,   TILE_grass,   TILE_grass},
-  {       TILE_treePine, TILE_grass,   TILE_treePine,      TILE_grass2},
+  {TILE_groundGrass0,    TILE_decoWater,   TILE_groundGrass0,   TILE_groundGrass0},
+  {       TILE_groundGrass0,    TILE_decoWater,   TILE_decoWeeds,      TILE_groundGrass1},
+  {TILE_decoRock1,   TILE_groundGrass0,   TILE_groundPondrock,   TILE_decoTreePine},
+  {       TILE_decoLogL,    TILE_groundGrass0,   TILE_decoWater,   TILE_decoTreePine},
+  {TILE_groundGrass1,   TILE_decoCampfire,   TILE_groundGrass1,  TILE_decoReed},
+  {       TILE_groundGrass0,    TILE_groundGrass0/*p*/,   TILE_groundGrass0,      TILE_decoWater},
+  {TILE_decoTreePine,    TILE_groundGrass0,   TILE_groundGrass0,   TILE_groundGrass0},
+  {       TILE_decoTreePine, TILE_groundGrass0,   TILE_decoTreePine,      TILE_groundGrass1},
 };
 
 int8_t isoX(int8_t x, int8_t y) {
@@ -91,15 +91,15 @@ void loop() {
       uint8_t frame = 0;
       int8_t ix = isoX(x,y);
       
-      if ((tile == TILE_water)  ||
-          (tile == TILE_reed)   ||
-          (tile == TILE_pondrock)) {
+      if ((tile == TILE_decoWater)  ||
+          (tile == TILE_decoReed)   ||
+          (tile == TILE_groundPondrock)) {
           frame = (((arduboy.frameCount) >> 4)+ (x*2) + (y%2)) & 0x7;
          if (frame > 3) {
             frame = 7 - frame;
          }
       }
-      else if (tile == TILE_campfire) {
+      else if (tile == TILE_decoCampfire) {
         frame = ((arduboy.frameCount) >> 5) % 3;
       }
 
@@ -109,10 +109,10 @@ void loop() {
       if ((x==1) && (y==5)) {
         if ((playerFrame == 0) &&
             ((((arduboy.frameCount) >> 3) & 0x3f) == 0)) { 
-          FX::drawBitmap(ix,iy,TILE_START,TILE_boy+1,dbmMasked);
+          FX::drawBitmap(ix,iy,TILE_START,TILE_characterBoy+1,dbmMasked);
         }
         else {
-          FX::drawBitmap(ix,iy,TILE_START,TILE_player+playerFrame,dbmMasked);
+          FX::drawBitmap(ix,iy,TILE_START,TILE_characterPlayer+playerFrame,dbmMasked);
         }
       }
     }
