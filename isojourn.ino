@@ -1,15 +1,18 @@
 #include <Arduboy2.h>
 #include <ArduboyFX.h>
 #include "data.h"
+#include "Controls.h"
 
-#define FX_DATA_PAGE 0xFECD
+#define FX_DATA_PAGE 0xFEBE
 #define FRAME_RATE 60
 #define ISOWIDTH 40
 #define ISOHEIGHT 20
 
-Arduboy2 arduboy;
+#define MAP_TILE_SIZE 3
 
-uint8_t playerFrame = 0;
+Arduboy2 arduboy;
+Controls controls;
+
 int8_t playerX = 0;
 int8_t playerY = 0;
 
@@ -34,45 +37,9 @@ void loop() {
   if (!arduboy.nextFrame()) return;
   arduboy.pollButtons();
 
-  // 8 way directions
-  if (arduboy.justPressed(DOWN_BUTTON)) {
-    playerFrame = 0;
-    if (arduboy.pressed(RIGHT_BUTTON)) {
-      playerFrame = 1;
-    }
-    else if (arduboy.pressed(LEFT_BUTTON)) {
-      playerFrame = 7;
-    }      
-  }
-  else if (arduboy.justPressed(UP_BUTTON)) {
-    playerFrame = 4;
-    if (arduboy.pressed(RIGHT_BUTTON)) {
-      playerFrame = 3;
-    }      
-    else if (arduboy.pressed(LEFT_BUTTON)) {
-      playerFrame = 5;
-    }      
-  }
-  else if (arduboy.justPressed(RIGHT_BUTTON)) {
-    playerFrame = 2;
-    if (arduboy.pressed(UP_BUTTON)) {
-      playerFrame = 3;
-    }      
-    else if (arduboy.pressed(DOWN_BUTTON)) {
-      playerFrame = 1;
-    }      
-  }
-  else if (arduboy.pressed(LEFT_BUTTON)) {
-    playerFrame = 6;
-    if (arduboy.pressed(UP_BUTTON)) {
-      playerFrame = 5;
-    }      
-    else if (arduboy.pressed(DOWN_BUTTON)) {
-      playerFrame = 7;
-    }      
-  }
+  Controls::Direction playerFrame = controls.getDirection();
 
-  if (arduboy.justPressed(A_BUTTON)) {
+  if (controls.doMove()) {
     if (playerFrame == 0) {
       playerY+=2;
     }
@@ -86,9 +53,6 @@ void loop() {
       playerX-=1;
     }
   }
-
-
-
 
   for (int8_t y=0; y < 8; y++) {
     FX::readDataArray(MAP_START,
@@ -140,10 +104,10 @@ void loop() {
       if ((x==1) && (y==5)) {
         if ((playerFrame == 0) &&
             ((((arduboy.frameCount) >> 3) & 0x3f) == 0)) { 
-          FX::drawBitmap(ix,iy,TILE_START,TILE_characterBoy+1,dbmMasked);
+          FX::drawBitmap(ix,iy,TILE_START,TILE_characterOldmanb,dbmMasked);
         }
         else {
-          FX::drawBitmap(ix,iy,TILE_START,TILE_characterPlayer+playerFrame,dbmMasked);
+          FX::drawBitmap(ix,iy,TILE_START,TILE_characterOldman+playerFrame,dbmMasked);
         }
       }
     }
