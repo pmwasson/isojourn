@@ -1,8 +1,8 @@
 #include <Arduboy2.h>
 #include <ArduboyFX.h>
-#include "isojourn.h"
+#include "data.h"
 
-#define FX_DATA_PAGE 0xFEE9
+#define FX_DATA_PAGE 0xFECD
 #define FRAME_RATE 60
 #define ISOWIDTH 40
 #define ISOHEIGHT 20
@@ -10,17 +10,10 @@
 Arduboy2 arduboy;
 
 uint8_t playerFrame = 0;
+int8_t playerX = 0;
+int8_t playerY = 0;
 
-uint8_t mapTile[8][4] = {
-  {TILE_groundGrass0,    TILE_decoWater,   TILE_groundGrass0,   TILE_groundGrass0},
-  {       TILE_groundGrass0,    TILE_decoWater,   TILE_decoWeeds,      TILE_groundGrass1},
-  {TILE_decoRock1,   TILE_groundGrass0,   TILE_groundPondrock,   TILE_decoTreePine},
-  {       TILE_decoLogL,    TILE_groundGrass0,   TILE_decoWater,   TILE_decoTreePine},
-  {TILE_groundGrass1,   TILE_decoCampfire,   TILE_groundGrass1,  TILE_decoReed},
-  {       TILE_groundGrass0,    TILE_groundGrass0/*p*/,   TILE_groundGrass0,      TILE_decoWater},
-  {TILE_decoTreePine,    TILE_groundGrass0,   TILE_groundGrass0,   TILE_groundGrass0},
-  {       TILE_decoTreePine, TILE_groundGrass0,   TILE_decoTreePine,      TILE_groundGrass1},
-};
+uint8_t mapBuffer[8*4*MAP_TILE_SIZE];
 
 int8_t isoX(int8_t x, int8_t y) {
   return x*ISOWIDTH+(y%2)*(ISOWIDTH/2) - 20;
@@ -79,15 +72,41 @@ void loop() {
     }      
   }
 
-  // Test
-  arduboy.setCursor(0,0);
-  arduboy.print("If you can read\nthis, the tiles\ndidn't draw.");
+  if (arduboy.justPressed(A_BUTTON)) {
+    if (playerFrame == 0) {
+      playerY+=2;
+    }
+    else if (playerFrame == 2) {
+      playerX+=1;
+    }
+    else if (playerFrame == 4) {
+      playerY-=2;
+    }
+    else if (playerFrame == 6) {
+      playerX-=1;
+    }
+  }
+
+
+
+
+  for (int8_t y=0; y < 8; y++) {
+    FX::readDataArray(MAP_START,
+                      playerY+y,                // y
+                      playerX*MAP_TILE_SIZE,    // x
+                      MAP_WIDTH*MAP_TILE_SIZE,  // row size
+                      mapBuffer+y*4*MAP_TILE_SIZE,
+                      4*MAP_TILE_SIZE);
+  }
 
   // Fill screen
   for (int8_t y = 0; y < 8; y++) {
     int8_t iy = isoY(y);
     for (int8_t x = 0; x < 4; x++) {
-      uint8_t tile = mapTile[y][x];
+      uint8_t tile = mapBuffer[y*4*MAP_TILE_SIZE+x*MAP_TILE_SIZE];
+      uint8_t obj  = mapBuffer[y*4*MAP_TILE_SIZE+x*MAP_TILE_SIZE+1];
+      uint8_t prop = mapBuffer[y*4*MAP_TILE_SIZE+x*MAP_TILE_SIZE+2];
+
       uint8_t frame = 0;
       int8_t ix = isoX(x,y);
       
@@ -95,9 +114,9 @@ void loop() {
           (tile == TILE_decoReed)   ||
           (tile == TILE_groundPondrock)) {
           frame = (((arduboy.frameCount) >> 4)+ (x*2) + (y%2)) & 0x7;
-         if (frame > 3) {
+          if (frame > 3) {
             frame = 7 - frame;
-         }
+          }
       }
       else if (tile == TILE_decoCampfire) {
         frame = ((arduboy.frameCount) >> 5) % 3;
@@ -105,6 +124,18 @@ void loop() {
 
       FX::drawBitmap(ix,iy,TILE_START,tile+frame,dbmMasked);
 
+      frame = 0;
+      if (obj == TILE_objCloud) {
+          frame = (((arduboy.frameCount) >> 4)+ (x*2) + (y%2)) & 0x7;
+          if (frame > 3) {
+            frame = 7 - frame;
+          }
+      }
+      
+      if (obj != 0) {
+        FX::drawBitmap(ix,iy,TILE_START,obj+frame,dbmMasked);
+      }
+      
       // draw player on top of map
       if ((x==1) && (y==5)) {
         if ((playerFrame == 0) &&
@@ -118,7 +149,13 @@ void loop() {
     }
   }
 
-
+//  for (int8_t y = 0; y < 8; y++) {
+//    for (int8_t x = 0; x < 4; x++) {
+//      arduboy.setCursor(x*8*3,y*8);
+//      arduboy.print(mapBuffer[y*4*MAP_TILE_SIZE+x*MAP_TILE_SIZE],HEX);
+//    }
+//  }
+  
   FX::enableOLED();// only enable OLED for updating the display
   arduboy.display(CLEAR_BUFFER);
   FX::disableOLED();// disable so flash cart can be used at any time

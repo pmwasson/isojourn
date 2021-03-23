@@ -9,7 +9,7 @@
     {
       "title": "isojourn",
       "filename": "isojourn.hex",
-      "flashdata": "tiles.bin",
+      "flashdata": "data.bin",
       "device": "ArduboyFX"
     }
   ],
