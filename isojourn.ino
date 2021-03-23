@@ -39,25 +39,52 @@ void loop() {
 
   Controls::Direction playerFrame = controls.getDirection();
 
+  bool evenRow = (playerY % 2) == 0;
+  
   if (controls.doMove()) {
-    if (playerFrame == 0) {
+    if (playerFrame == Controls::dirSouth) {
       playerY+=2;
     }
-    else if (playerFrame == 2) {
+    else if (playerFrame == Controls::dirSouthEast) {
+      playerY+=1;
+      if (!evenRow) {
+        playerX+=1;
+      }    
+    }
+    else if (playerFrame == Controls::dirEast) {
       playerX+=1;
     }
-    else if (playerFrame == 4) {
+    else if (playerFrame == Controls::dirNorthEast) {
+      playerY-=1;
+      if (!evenRow) {
+        playerX+=1;
+      }    
+    }
+    else if (playerFrame == Controls::dirNorth) {
       playerY-=2;
     }
-    else if (playerFrame == 6) {
+    else if (playerFrame == Controls::dirNorthWest) {
+      playerY-=1;
+      if (evenRow) {
+        playerX-=1;
+      }    
+    }
+    else if (playerFrame == Controls::dirWest) {
       playerX-=1;
+    }
+    else if (playerFrame == Controls::dirSouthWest) {
+      playerY+=1;
+      if (evenRow) {
+        playerX-=1;
+      }    
     }
   }
 
   for (int8_t y=0; y < 8; y++) {
+    int8_t offset = (playerY%2) && (y%2); // if starting with an odd row, add offset to odd rows
     FX::readDataArray(MAP_START,
                       playerY+y,                // y
-                      playerX*MAP_TILE_SIZE,    // x
+                      (playerX+offset)*MAP_TILE_SIZE,    // x
                       MAP_WIDTH*MAP_TILE_SIZE,  // row size
                       mapBuffer+y*4*MAP_TILE_SIZE,
                       4*MAP_TILE_SIZE);
